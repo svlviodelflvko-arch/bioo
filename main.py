@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 import sys
-import pyautogui  # Ajout pour bloquer la souris
+import pyautogui 
 from modules.camera_handler import CameraHandler
 from modules.face_detector import FaceDetector
 from modules.face_encoder import FaceEncoder
@@ -13,7 +13,7 @@ from modules.system_controller import SystemController
 # Configurations
 ABSENCE_TIMEOUT = 10
 AUTH_INTERVAL = 2
-pyautogui.FAILSAFE = False # Désactive la sécurité pour notre blocage de souris
+pyautogui.FAILSAFE = False 
 
 def create_lock_screen_image():
     # Crée une image totalement noire (1920x1080)
@@ -71,7 +71,13 @@ def main():
                         if is_locked:
                             is_locked = False
                             print(f"[{time.strftime('%H:%M:%S')}] Déverrouillé par {user}")
+                            # --- ENVOI DU LOG DE SUCCÈS À LA BDD ---
+                            db.log_access(user, "SUCCES")
                     else:
+                        # INTRUS
+                        if not is_locked:
+                            # --- ENVOI DU LOG D'ÉCHEC À LA BDD ---
+                            db.log_access("Inconnu", "ECHEC")
                         is_locked = True
                 last_auth_time = current_time
         else:
@@ -84,24 +90,21 @@ def main():
         # GESTION DE L'AFFICHAGE ET ANTI-NAVIGATION
         # ==========================================
         if is_locked:
-            # 1. On force la création d'une VRAIE fenêtre plein écran
             cv2.namedWindow("VERROUILLAGE", cv2.WINDOW_NORMAL)
             cv2.setWindowProperty("VERROUILLAGE", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             cv2.imshow("VERROUILLAGE", lock_screen_img)
             cv2.setWindowProperty("VERROUILLAGE", cv2.WND_PROP_TOPMOST, 1)
 
-            # 2. SÉCURITÉ : On bloque la souris au milieu de l'écran !
-            # Impossible de cliquer sur la barre des tâches Windows.
+            # SÉCURITÉ : On bloque la souris au milieu de l'écran
             pyautogui.moveTo(960, 540)
 
         else:
-            # L'écran est déverrouillé : on DÉTRUIT l'écran noir pour être 100% furtif
+            # L'écran est déverrouillé : on détruit l'écran noir
             try:
                 cv2.destroyWindow("VERROUILLAGE")
             except:
                 pass
 
-        # Touche d'urgence pour quitter le programme (cliquez sur l'écran noir et appuyez sur 'q')
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

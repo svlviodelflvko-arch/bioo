@@ -15,7 +15,7 @@ param(
     [switch]$NoCleanup
 )
 
-function Test-Administrator {
+function Ensure-RunningAsAdministrator {
     $currentIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($currentIdentity)
     if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -34,7 +34,7 @@ function Test-Administrator {
     }
 }
 
-function Get-Installer {
+function Download-Installer {
     param(
         [string]$Url,
         [string]$DestinationPath
@@ -80,12 +80,12 @@ function Install-Redistributable {
 }
 
 # Main
-Test-Administrator
+Ensure-RunningAsAdministrator
 
 $downloadUrl = 'https://aka.ms/vs/17/release/vc_redist.x64.exe'
 $installerPath = Join-Path -Path $env:TEMP -ChildPath 'vc_redist.x64.exe'
 
-if (-not (Get-Installer -Url $downloadUrl -DestinationPath $installerPath)) {
+if (-not (Download-Installer -Url $downloadUrl -DestinationPath $installerPath)) {
     exit 1
 }
 

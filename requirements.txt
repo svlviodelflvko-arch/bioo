@@ -5,3 +5,5 @@ keras-facenet
 tensorflow
 scipy
 pyautogui
+streamlit
+pandas

@@ -2,7 +2,7 @@ opencv-python
 mediapipe
 numpy
 keras-facenet
-tensorflow
+tensorflow-cpu
 scipy
 pyautogui
 streamlit
